@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_build_tour"
+            android:title="Build a Tour"
+            />
+        <item
+            android:id="@+id/nav_saved_tours"
+            android:title="Saved Tours" />
+        <item
+            android:id="@+id/nav_current"
+            android:title="Current location" />
+    </group>
+</menu>

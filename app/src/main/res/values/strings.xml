@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">TourGuide</string>
+    <string name="action_settings">Settings</string>
+    <string name="city_prompt">Choose a city</string>
+    <string-array name="cities_array">
+        <item>Ottawa</item>
+        <item>Montreal</item>
+        <item>Toronto</item>
+        <item>Vancouver</item>
+    </string-array>
+</resources>

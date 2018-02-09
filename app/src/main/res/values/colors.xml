@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="stringColorMain">#243b6f</color>
+    <color name="backgroundColor">#eae3d9</color>
+    <color name="navy">#21265e</color>
+    <color name="lightOrangy">#e3ada4</color>
+    <color name="darkerOrangy">#c98e84</color>
+    <color name="burgundyBack">#613942</color>
+    <color name="darkBlue">#272733</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="OttawaButton">#e6998d</color>
+    <color name="Beige">#e8dbcb</color>
+    <color name="White">#ffffff</color>
+    <color name="charcoal">#36374b</color>
+    <color name="DifferentCityButton">#446381</color>
+</resources>
