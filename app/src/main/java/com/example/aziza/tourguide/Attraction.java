@@ -1,6 +1,9 @@
 package com.example.aziza.tourguide;
 
+import android.net.wifi.aware.AttachCallback;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Created by aziza on 2018-01-31.
@@ -34,6 +37,23 @@ public class Attraction {
                 return true;
         }
         return false;
+    }
+
+    public static boolean removeAttraction(ArrayList<Attraction> attractions, String name) {
+        Attraction att = null;
+        for (Attraction a: attractions) {
+            if (a.name.equalsIgnoreCase(name))
+                att = a;
+        }
+        return attractions.remove(att);
+    }
+
+    public static Attraction getAttraction (HashSet<Attraction> attractions, String name) {
+        for (Attraction a: attractions) {
+            if (a.name.equalsIgnoreCase(name))
+                return a;
+        }
+        return null;
     }
 
     public static Attraction getAttraction (ArrayList<Attraction> attractions, String name) {

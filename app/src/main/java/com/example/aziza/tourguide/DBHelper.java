@@ -54,6 +54,12 @@ public final class DBHelper extends SQLiteOpenHelper {
                         "to_time_week text, to_time_wend text, latitude double, longitude double)"
         );
 
+        /*create table with tours */
+        db.execSQL(
+                "create table tours " +
+                        "(id integer primary key, city text, att_name text)"
+        );
+
 //         /* create table with attractions' hours of operation */
 //        db.execSQL(
 //                "create table hours_operation " +

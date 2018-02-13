@@ -14,12 +14,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -48,6 +50,11 @@ import org.w3c.dom.Text;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -58,7 +65,7 @@ public class startPoint extends AppCompatActivity implements LocationListener {
 
     MyLocationNewOverlay mLocationOverlay;
     CompassOverlay mCompassOverlay;
-    Button addPoint;
+    Button addPoint, startTour, saveTour;
     TextView newPoint, chosenRoute;
     Marker myLocation;
     int count = 0;
@@ -69,8 +76,11 @@ public class startPoint extends AppCompatActivity implements LocationListener {
     private LocationManager lm;
     DBHelper mydb = new DBHelper(this);
     ArrayList<Attraction> attractions = new ArrayList<Attraction>();
-    ArrayList<Attraction> chosenAttractions = new ArrayList<Attraction>();
+    ArrayList<Attraction> chosenAttractions = new ArrayList<>();
     ArrayList<Polyline> overlays = new ArrayList<Polyline>();
+    ArrayList<TextView> chosenSpotsAll = new ArrayList<TextView>();
+    ArrayList<Button> removeButtonsArray = new ArrayList<Button>();
+    HashMap<Button,TextView> remButToText = new HashMap<Button, TextView>();
     private Location currentLocation = null;
 
     @Override
@@ -81,11 +91,12 @@ public class startPoint extends AppCompatActivity implements LocationListener {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         setContentView(R.layout.pick_point_activity);
 
+        startTour = (Button) findViewById(R.id.startTour);
+        saveTour = (Button) findViewById(R.id.saveTour);
+
         newPoint = (TextView) findViewById(R.id.place);
-        chosenRoute = (TextView) findViewById(R.id.chosenSpots);
         addPoint = (Button) findViewById(R.id.pointAddLoc);
         map = (MapView) findViewById(R.id.map);
-
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setBuiltInZoomControls(true);
         map.setMultiTouchControls(true);
@@ -102,23 +113,32 @@ public class startPoint extends AppCompatActivity implements LocationListener {
 
         map.getOverlays().add(this.mCompassOverlay);
         map.getOverlays().add(this.mLocationOverlay);
-
         Location def = new Location(LocationManager.GPS_PROVIDER);
         def.setLatitude(mydb.getLatitude());
         def.setLongitude(mydb.setLongitude());
         mapController.animateTo(new GeoPoint(def));
 
-        addPoint.setOnClickListener(new View.OnClickListener()  {
+        addPoint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String newAtt = newPoint.getText().toString();
+                final String newAtt = newPoint.getText().toString();
                 if (!Attraction.containsAttraction(chosenAttractions, newAtt)) {
                     count++;
+
+                    /*set new attraction field*/
+                    int resID = getResources().getIdentifier("chosenSpot" + count, "id", getPackageName());
+                    chosenRoute = (TextView) findViewById(resID);
+                    String text = count + " " + newAtt;
                     chosenRoute.setVisibility(View.VISIBLE);
-                    String text = chosenRoute.getText().toString();
-                    text = text + "\r\n" + count + " " + newAtt;
                     chosenRoute.setText(text);
+                    chosenSpotsAll.add(chosenRoute);
                     chosenAttractions.add(Attraction.getAttraction(attractions, newAtt));
+
+                    /*make remove button visible */
+                    int remAttId = getResources().getIdentifier("chosenSpot" + count + "Remove", "id", getPackageName());
+                    final Button addRemoveButton = (Button) findViewById(remAttId);
+                    addRemoveButton.setVisibility(View.VISIBLE);
+
                     ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
                     for (int i = 0; i < chosenAttractions.size(); i++) {
                         GeoPoint point = new GeoPoint(chosenAttractions.get(i).latitude, chosenAttractions.get(i).longitude);
@@ -133,20 +153,79 @@ public class startPoint extends AppCompatActivity implements LocationListener {
                         roadManager.addRequestOption("optimize=true");
                         Road road = roadManager.getRoad(waypoints);
                         Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
-                        overlays.add(roadOverlay);
                         map.getOverlays().removeAll(overlays);
+                        overlays.add(roadOverlay);
                         map.getOverlays().add(roadOverlay);
                         map.invalidate();
-
                     }
-                }
-                else {
+                } else {
                     Toast toast = Toast.makeText(ctx, "Already Added!", Toast.LENGTH_SHORT);
                     toast.show();
                 }
             }
         });
 
+        /*hook up all buttons to text field */
+        for (int i = 1; i < 10; i++) {
+            int resID = getResources().getIdentifier("chosenSpot" + i, "id", getPackageName());
+            chosenRoute = (TextView) findViewById(resID);
+            int remAttId = getResources().getIdentifier("chosenSpot" + i + "Remove", "id", getPackageName());
+            final Button addRemoveButton = (Button) findViewById(remAttId);
+            remButToText.put(addRemoveButton, chosenRoute);
+            removeButtonsArray.add(addRemoveButton);
+        }
+
+        for (final Button b : removeButtonsArray) {
+            b.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    count--;
+                    Log.i("START POINT", remButToText.get(b).getText().toString());
+                    String attNameToDel = remButToText.get(b).getText().toString().substring(2);
+                    Log.i("START POINT", attNameToDel);
+
+                    Attraction.removeAttraction(chosenAttractions, attNameToDel);
+                    for (TextView t : chosenSpotsAll) {
+                        t.setVisibility(View.INVISIBLE);
+                    }
+                    for (Button b : remButToText.keySet()) {
+                        b.setVisibility(View.INVISIBLE);
+                    }
+                    for (int i = 0; i < chosenAttractions.size(); i++) {
+                        int forText = i + 1;
+                        chosenSpotsAll.get(i).setText(forText + " " + chosenAttractions.get(i).name);
+                        removeButtonsArray.get(i).setVisibility(View.VISIBLE);
+                        chosenSpotsAll.get(i).setVisibility(View.VISIBLE);
+                    }
+
+                    ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
+                    for (int i = 0; i < chosenAttractions.size(); i++) {
+                        GeoPoint point = new GeoPoint(chosenAttractions.get(i).latitude, chosenAttractions.get(i).longitude);
+                        waypoints.add(point);
+                    }
+                    if (count > 1) {
+                        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                        StrictMode.setThreadPolicy(policy);
+                        RoadManager roadManager = new GraphHopperRoadManager("fae5bf0a-402a-48b2-96ac-324e138f53dc", true);
+                        roadManager.addRequestOption("vehicle=foot");
+                        roadManager.addRequestOption("optimize=true");
+                        Road road = roadManager.getRoad(waypoints);
+                        Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
+                        map.getOverlays().removeAll(overlays);
+                        overlays.add(roadOverlay);
+                        map.getOverlays().add(roadOverlay);
+                        map.invalidate();
+                    }
+                }
+            });
+        }
+
+        saveTour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
     }
 
         public void onResume() {

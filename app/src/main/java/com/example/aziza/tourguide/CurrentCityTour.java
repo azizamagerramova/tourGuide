@@ -40,7 +40,7 @@ public class CurrentCityTour extends AppCompatActivity implements TimePickerFrag
         nextStep = (Button) findViewById(R.id.nextStep);
         mydb = new DBHelper(this);
      //   mydb.dropDB();
-        mydb.generateContentDB();
+     //   mydb.generateContentDB();
         city = mydb.getCurrent();
         pickTimeFrom.setText(mydb.getFromTime(city), TextView.BufferType.NORMAL);
         pickTimeTo.setText(mydb.getToTime(city), TextView.BufferType.NORMAL);
