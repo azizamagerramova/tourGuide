@@ -11,6 +11,7 @@ import java.util.HashSet;
 
 public class Attraction {
     String name;
+    String id;
     String city;
     String from_time_week;
     String from_time_wed;
@@ -19,7 +20,8 @@ public class Attraction {
     double latitude;
     double longitude;
 
-    public Attraction(String name, String city, String from_time_week, String from_time_wed, String to_time_week, String to_time_wed, double latitude, double longitude) {
+    public Attraction( String id, String name, String city, String from_time_week, String from_time_wed, String to_time_week, String to_time_wed, double latitude, double longitude) {
+        this.id = id;
         this.name = name;
         this.city = city;
         this.from_time_week = from_time_week;

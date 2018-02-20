@@ -7,8 +7,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import org.w3c.dom.Attr;
+
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by aziza on 2018-01-16.
@@ -28,7 +31,7 @@ public final class DBHelper extends SQLiteOpenHelper {
     public static final String CITY_COLUMN_TO_TIME_WEEK = "to_time_week";
     public static final String CITY_COLUMN_FROM_TIME_WEND = "from_time_wend";
     public static final String CITY_COLUMN_TO_TIME_WEND = "to_time_wend";
-
+    public static String currentTourName ="-1";
 
     public static final String ATTRACTIONS_TABLE = "attractions";
     public static final String ATTRACTION_NAME = "att_name";
@@ -44,21 +47,22 @@ public final class DBHelper extends SQLiteOpenHelper {
         // TODO Auto-generated method stub
         db.execSQL(
                 "create table cities " +
-                        "(city text primary key, from_time text, to_time text, latitude double, longitude double, current integer)"
+                        "(id text primary key, city text, from_time text, to_time text, latitude double, longitude double, current integer)"
         );
 
         /* create table with attractions */
         db.execSQL(
                 "create table attractions " +
-                        "(att_name text primary key, city text, from_time_week text, from_time_wend text, " +
+                        "(id text primary key, att_name text, city text, from_time_week text, from_time_wend text, " +
                         "to_time_week text, to_time_wend text, latitude double, longitude double)"
         );
 
         /*create table with tours */
         db.execSQL(
                 "create table tours " +
-                        "(id integer primary key, city text, att_name text)"
+                        "(id text primary key, city_id text, tour_name text, att_id text)"
         );
+
 
 //         /* create table with attractions' hours of operation */
 //        db.execSQL(
@@ -74,6 +78,31 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS cities");
         db.execSQL("DROP TABLE IF EXISTS attractions");
         onCreate(db);
+    }
+
+    public ArrayList<Attraction> getAttractionsForCurrentTour () {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<Attraction> attractionsForCurrent = new ArrayList<Attraction>();
+        Cursor res = db.rawQuery("select * from tours where tour_name = '" + currentTourName + "'", null);
+        if(res!=null && res.getCount()>0) {
+            Log.i("Gotta know ", "res is " + res.getCount());
+            for (int i=0;i<res.getCount();i++) {
+                res.moveToNext();
+                String thisId = res.getString(res.getColumnIndex("att_id"));
+                Cursor otherRes = db.rawQuery("select * from attractions where id = '" + thisId + "'", null);
+                otherRes.moveToFirst();
+                 /*create attraction object */
+                Attraction newAttraction = new Attraction(otherRes.getString(otherRes.getColumnIndex("id")),
+                        otherRes.getString(otherRes.getColumnIndex(ATTRACTION_NAME)),
+                        otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_CITY)), otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_FROM_TIME_WEEK)), otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_FROM_TIME_WEND)),
+                        otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_TO_TIME_WEEK)), otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_TO_TIME_WEND)),
+                        otherRes.getDouble(otherRes.getColumnIndex(LATITUDE)), otherRes.getDouble(otherRes.getColumnIndex(LONGITUDE)));
+                attractionsForCurrent.add(newAttraction);
+                Log.i("DB Helper", "Retrieving attractions for current tour: "+newAttraction.name);
+            }
+        }
+        return  attractionsForCurrent;
+
     }
 
     public boolean addHours (String cityName, String from_time, String to_time) {
@@ -95,6 +124,74 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.update("cities", contentValues, "city = '" + cityName + "'", null );
 
         return true;
+    }
+
+    public boolean addTour(String tourName, ArrayList<Attraction> attractions) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor res = db.rawQuery("select * from tours where tour_name = '" + currentTourName + "'", null);
+
+        if (res.getCount()<=0) {
+            for (Attraction a : attractions) {
+                ContentValues contentValues = new ContentValues();
+                String uniqueID = UUID.randomUUID().toString();
+                contentValues.put("id", uniqueID);
+                contentValues.put("tour_name", tourName);
+                contentValues.put("city_id", this.getCurrentCityId());
+                contentValues.put("att_id", a.id);
+                db.insert("tours", null, contentValues);
+                Log.i("Attraction name to add ", a.name);
+            }
+            return true;
+        }
+        else {
+            for (Attraction a : attractions) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put("tour_name", tourName);
+                contentValues.put("city_id", this.getCurrentCityId());
+                contentValues.put("att_id", a.id);
+                db.update("tours", contentValues, "tour_name = '" + currentTourName + "'", null );
+
+            }
+        }
+        return true;
+    }
+
+
+    public ArrayList<String> getTourNamesForCurrentCity() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<String> toursForCurrent = new ArrayList<String>();
+        String cityId = getCurrentCityId();
+        Cursor res = db.rawQuery("select * from tours where city_id = '" + cityId + "'", null);
+        if(res!=null && res.getCount()>0) {
+            for (int i=0;i<res.getCount();i++) {
+                res.moveToNext();
+                if (!toursForCurrent.contains(res.getString(res.getColumnIndex("tour_name"))))
+                    toursForCurrent.add(res.getString(res.getColumnIndex("tour_name")));
+                   // Log.i("Attraction name ", toursForCurrent.get(i));
+            }
+        }
+        return toursForCurrent;
+    }
+
+    public void setCurrentTourName(String tourName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from tours where tour_name = '" + tourName + "'", null);
+        if(res!=null && res.getCount()>0) {
+            res.moveToFirst();
+            currentTourName = res.getString(res.getColumnIndex("tour_name"));
+            Log.i("DB Helper", "****************Current Tour Name is " + currentTourName);
+
+        }
+    }
+
+    public boolean toursExist() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String cityId = getCurrentCityId();
+        Cursor res = db.rawQuery("select * from tours where city_id = '" + cityId + "'", null);
+        if (res.getCount()>0) {
+            return true;
+        }
+        return false;
     }
 
     public String getFromTime(String city) {
@@ -122,6 +219,8 @@ public final class DBHelper extends SQLiteOpenHelper {
     public boolean generateContentDB () {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
+        String uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put("city", "Ottawa");
         contentValues.put("from_time", "00:00am");
         contentValues.put("to_time", "00:00am");
@@ -131,6 +230,8 @@ public final class DBHelper extends SQLiteOpenHelper {
 
         /*create few other cities and see how it goes */
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put("city", "Montreal");
         contentValues.put("from_time", "00:00am");
         contentValues.put("to_time", "00:00am");
@@ -139,6 +240,8 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.insert("cities", null, contentValues);
 
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put("city", "Vancouver");
         contentValues.put("from_time", "00:00am");
         contentValues.put("to_time", "00:00am");
@@ -147,6 +250,8 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.insert("cities", null, contentValues);
 
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put("city", "Toronto");
         contentValues.put("from_time", "00:00am");
         contentValues.put("to_time", "00:00am");
@@ -157,6 +262,8 @@ public final class DBHelper extends SQLiteOpenHelper {
 
         /* generate attractions, start with Ottawa */
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put(ATTRACTION_NAME, "Parliament Hill");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "08:30am");
@@ -168,6 +275,8 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
 
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put(ATTRACTION_NAME, "Canadian Museum of History");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "09:30am");
@@ -179,6 +288,8 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
 
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put(ATTRACTION_NAME, "National Gallery of Canada");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "10:00am");
@@ -190,6 +301,8 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
 
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put(ATTRACTION_NAME, "Rideau Hall");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "11:00am");
@@ -201,6 +314,8 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
 
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put(ATTRACTION_NAME, "Jacques Cartier Park");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
@@ -212,6 +327,8 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
 
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put(ATTRACTION_NAME, "Dow's Lake");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
@@ -223,6 +340,8 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
 
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put(ATTRACTION_NAME, "Canada Science and Technology Museum");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "09:00am");
@@ -234,6 +353,8 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
 
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put(ATTRACTION_NAME, "Byward Market");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
@@ -245,6 +366,8 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
 
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put(ATTRACTION_NAME, "Dominion Arboretum");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "09:00am");
@@ -256,6 +379,8 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
 
         contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
         contentValues.put(ATTRACTION_NAME, "Notre-Dame Cathedral Basilica");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
@@ -279,7 +404,8 @@ public final class DBHelper extends SQLiteOpenHelper {
              for (int i=0;i<res.getCount();i++) {
                  res.moveToNext();
                  /*create attraction object */
-                 Attraction newAttraction = new Attraction(res.getString(res.getColumnIndex(ATTRACTION_NAME)),
+                 Attraction newAttraction = new Attraction(res.getString(res.getColumnIndex("id")),
+                         res.getString(res.getColumnIndex(ATTRACTION_NAME)),
                          res.getString(res.getColumnIndex(CITY_COLUMN_CITY)), res.getString(res.getColumnIndex(CITY_COLUMN_FROM_TIME_WEEK)), res.getString(res.getColumnIndex(CITY_COLUMN_FROM_TIME_WEND)),
                          res.getString(res.getColumnIndex(CITY_COLUMN_TO_TIME_WEEK)), res.getString(res.getColumnIndex(CITY_COLUMN_TO_TIME_WEND)),
                          res.getDouble(res.getColumnIndex(LATITUDE)), res.getDouble(res.getColumnIndex(LONGITUDE)));
@@ -287,9 +413,6 @@ public final class DBHelper extends SQLiteOpenHelper {
              }
          }
 
-         for (Attraction a: attractionsCity) {
-             Log.i("DB Helper: ", a.name);
-         }
          return attractionsCity;
     }
 
@@ -308,7 +431,6 @@ public final class DBHelper extends SQLiteOpenHelper {
         Cursor res = db.rawQuery("select * from cities where current = 1", null);
         if (res!=null && res.getCount()>0) {
             res.moveToFirst();
-            Log.i("DB HELPER", res.getString(res.getColumnIndex(LONGITUDE)));
             return res.getDouble(res.getColumnIndex(LONGITUDE));
         }
         return 0.0;
@@ -335,11 +457,19 @@ public final class DBHelper extends SQLiteOpenHelper {
     public String getCurrent() {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("select * from cities where current = 1", null);
-        Log.i("DB Helper", "There exists current");
         if(res!=null && res.getCount()>0) {
-            Log.i("DB Helper", "There exists current");
             res.moveToFirst();
             return res.getString(res.getColumnIndex(CITY_COLUMN_CITY));
+        }
+        return "";
+    }
+
+    public String getCurrentCityId() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from cities where current = 1", null);
+        if(res!=null && res.getCount()>0) {
+            res.moveToFirst();
+            return res.getString(res.getColumnIndex("id"));
         }
         return "";
     }
@@ -349,6 +479,7 @@ public final class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         db.execSQL("DROP TABLE IF EXISTS cities");
         db.execSQL("DROP TABLE IF EXISTS attractions");
+        db.execSQL("DROP TABLE IF EXISTS tours");
     //    db.execSQL("DROP TABLE IF EXISTS hours_operation");
         onCreate(db);
     }

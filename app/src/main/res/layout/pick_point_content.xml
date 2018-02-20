@@ -308,7 +308,7 @@
         android:textSize="10dp" />
 
     <Button
-        android:id="@+id/startTour"
+        android:id="@+id/buildTour"
         android:layout_width="70dp"
         android:layout_height="35dp"
         android:layout_alignBaseline="@+id/saveTour"
@@ -316,7 +316,7 @@
         android:layout_marginStart="8dp"
         android:layout_toEndOf="@+id/chosenSpot10Remove"
         android:background="@drawable/rounded_buttons"
-        android:text="Start tour"
+        android:text="Build tour"
         android:textColor="@color/navy"
         android:textSize="10dp" />
 
