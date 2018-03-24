@@ -40,16 +40,16 @@ public class CurrentCityTour extends AppCompatActivity implements TimePickerFrag
         nextStep = (Button) findViewById(R.id.nextStep);
         mydb = new DBHelper(this);
         city = mydb.getCurrent();
-        pickTimeFrom.setText(mydb.getFromTime(city), TextView.BufferType.NORMAL);
-        pickTimeTo.setText(mydb.getToTime(city), TextView.BufferType.NORMAL);
+        pickTimeFrom.setText(mydb.getFromTime(), TextView.BufferType.NORMAL);
+        pickTimeTo.setText(mydb.getToTime(), TextView.BufferType.NORMAL);
 
         nextStep.setOnClickListener(new View.OnClickListener()  {
             @Override
             public void onClick(View view) {
                 if (fromTime.equalsIgnoreCase(""))
-                    fromTime = mydb.getFromTime(city);
+                    fromTime = mydb.getFromTime();
                 if (toTime.equalsIgnoreCase(""))
-                    toTime = mydb.getToTime(city);
+                    toTime = mydb.getToTime();
                 mydb.addHours(city, fromTime, toTime);
                 Intent pickPointPage = new Intent(CurrentCityTour.this, startPoint.class);
                 startActivityForResult(pickPointPage, 0);
