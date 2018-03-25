@@ -7,7 +7,7 @@
     android:background="@drawable/back8"
     android:visibility="visible"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.example.aziza.tourguide.CurrentCityTour"
+    tools:context="com.example.aziza.tourguide.PickTime"
     tools:openDrawer="start"
     tools:showIn="@layout/city_time_activity">
 

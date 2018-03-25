@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CurrentCityTour"
+            android:name=".PickTime"
             android:label="yourFlight"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

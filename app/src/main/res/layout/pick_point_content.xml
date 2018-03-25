@@ -14,7 +14,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true" />
+        android:layout_alignTop="@+id/place" />
 
     <TextView
         android:id="@+id/place"
@@ -299,7 +299,7 @@
         android:layout_width="70dp"
         android:layout_height="35dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="81dp"
+        android:layout_marginBottom="70dp"
         android:layout_marginEnd="14dp"
         android:layout_toStartOf="@+id/chosenSpot10"
         android:background="@drawable/rounded_buttons"
@@ -308,17 +308,41 @@
         android:textSize="10dp" />
 
     <Button
+        android:id="@+id/startTour"
+        android:layout_width="70dp"
+        android:layout_height="35dp"
+        android:layout_marginBottom="70dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/rounded_buttons"
+        android:visibility="invisible"
+        android:text="Start tour"
+        android:textColor="@color/navy"
+        android:textSize="10dp" />
+
+    <Button
         android:id="@+id/buildTour"
         android:layout_width="70dp"
         android:layout_height="35dp"
-        android:layout_alignBaseline="@+id/saveTour"
-        android:layout_alignBottom="@+id/saveTour"
-        android:layout_marginStart="8dp"
+        android:layout_marginBottom="70dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="12dp"
         android:layout_toEndOf="@+id/chosenSpot10Remove"
         android:background="@drawable/rounded_buttons"
         android:text="Build tour"
         android:textColor="@color/navy"
         android:textSize="10dp" />
+
+    <TextView
+        android:id="@+id/TimeToDest"
+        android:layout_width="fill_parent"
+        android:layout_height="60dp"
+        android:layout_alignBottom="@+id/chosenSpot1Remove"
+        android:layout_alignParentStart="true"
+        android:background="@color/charcoal"
+        android:text="TextView"
+        android:textColor="@color/Beige"
+        android:visibility="invisible" />
 
 
 </RelativeLayout>

@@ -5,6 +5,7 @@ package com.example.aziza.tourguide;
  */
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -16,11 +17,16 @@ import android.widget.Toast;
 
 public class TimePickerFragment extends DialogFragment {
     private TimePicker timePicker;
+    DBHelper myDB;
+    Context ctx;
+
     public interface TimeDialogListener {
         void onFinishDialog(String time);
     }
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        ctx = getContext();
+        myDB = new DBHelper(ctx);
         View v = LayoutInflater.from(getActivity())
                 .inflate(R.layout.dialog_time, null);
 
@@ -33,6 +39,7 @@ public class TimePickerFragment extends DialogFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 int hour = 0;
+                                /*TODO: fix resetting to current hour  */
                                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
                                     hour = timePicker.getHour();
                                 } else {

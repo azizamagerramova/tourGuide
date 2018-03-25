@@ -1,6 +1,6 @@
 package com.example.aziza.tourguide;
 
-import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,11 +13,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by aziza on 2018-01-12.
  */
 
-public class CurrentCityTour extends AppCompatActivity implements TimePickerFragment.TimeDialogListener {
+public class PickTime extends AppCompatActivity implements TimePickerFragment.TimeDialogListener {
+    Date fromTimeDateObj;
+    Date toTimeDateObj;
     public String city = "";
     private String fromTime = "";
     private String toTime = "";
@@ -33,6 +39,7 @@ public class CurrentCityTour extends AppCompatActivity implements TimePickerFrag
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final Context ctx = getApplicationContext();
         setContentView(R.layout.city_time_activity);
         timeDisplay = (TextView)findViewById(R.id.fromTime);
         pickTimeFrom = (EditText) findViewById(R.id.fromClock);
@@ -43,6 +50,7 @@ public class CurrentCityTour extends AppCompatActivity implements TimePickerFrag
         pickTimeFrom.setText(mydb.getFromTime(), TextView.BufferType.NORMAL);
         pickTimeTo.setText(mydb.getToTime(), TextView.BufferType.NORMAL);
 
+
         nextStep.setOnClickListener(new View.OnClickListener()  {
             @Override
             public void onClick(View view) {
@@ -50,9 +58,17 @@ public class CurrentCityTour extends AppCompatActivity implements TimePickerFrag
                     fromTime = mydb.getFromTime();
                 if (toTime.equalsIgnoreCase(""))
                     toTime = mydb.getToTime();
-                mydb.addHours(city, fromTime, toTime);
-                Intent pickPointPage = new Intent(CurrentCityTour.this, startPoint.class);
-                startActivityForResult(pickPointPage, 0);
+                fromTimeDateObj = mydb.parseTime(fromTime);
+                toTimeDateObj = mydb.parseTime(toTime);
+                long differenceStartEnd = mydb.timeDifference(toTimeDateObj, fromTimeDateObj, TimeUnit.MINUTES);
+                if (differenceStartEnd > 20) {
+                    mydb.addHours(city, fromTime, toTime);
+                    Intent pickPointPage = new Intent(PickTime.this, startPoint.class);
+                    startActivityForResult(pickPointPage, 0);
+                }
+                else {
+                    Toast.makeText(ctx, "Time is incorrect!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 

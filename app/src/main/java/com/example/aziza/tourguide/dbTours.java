@@ -24,7 +24,7 @@ public class dbTours extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.i("Got in the listener", "GUT");
-                Intent cityTimePage = new Intent(dbTours.this, CurrentCityTour.class);
+                Intent cityTimePage = new Intent(dbTours.this, PickTime.class);
                 startActivityForResult(cityTimePage, 0);
             }
         });
