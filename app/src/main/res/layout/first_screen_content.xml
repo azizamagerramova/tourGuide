@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f9fafa"
+    tools:context="com.example.aziza.tourguide.MainActivity"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/first_screen_activity"
+    android:id="@+id/relativeLayout2">
+
+
+    <TextView
+        android:id="@+id/createNewTourText"
+        android:layout_width="335dp"
+        android:layout_height="37dp"
+        android:text="Do you wish to create a new tour?"
+        android:textColor="@color/charcoal"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintBottom_toTopOf="@id/guideline"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/createNewTour"
+        android:layout_width="335dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="20dp"
+        android:background="@color/DarkGreen"
+        android:text="Create"
+        android:textColor="@color/White"
+        android:textSize="15sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline" />
+
+    <TextView
+        android:id="@+id/loadExistingTourText"
+        android:layout_width="335dp"
+        android:layout_height="37dp"
+        android:layout_marginBottom="20dp"
+        android:text="Do you wish to load an existing tour?"
+        android:textColor="@color/charcoal"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintBottom_toTopOf="@+id/guideline2"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/loadExistingTour"
+        android:layout_width="335dp"
+        android:layout_height="49dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/BrightGreen"
+        android:text="Load"
+        android:textColor="@color/White"
+        android:textSize="15sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guideline2" />
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guideline"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.3"/>
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guideline2"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.7"/>
+
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout6"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f1ebe5"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.example.aziza.tourguide.PathReady"
+    tools:showIn="@layout/build_path_activity">
+
+    <org.osmdroid.views.MapView
+        android:id="@+id/map"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/startNavigation"
+        android:layout_width="335dp"
+        android:layout_height="49dp"
+        android:layout_marginBottom="40dp"
+        android:background="@color/BrightGreen"
+        android:text="Start Navigation"
+        android:textColor="#ffffff"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/rebuildTour"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:background="@color/BrightGreen"
+        android:text="Rebuild"
+        android:textColor="#ffffff"
+        android:textSize="15sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <TextView
+        android:id="@+id/navigationInfo"
+        android:layout_width="0dp"
+        android:layout_height="65dp"
+        android:background="@color/DarkGreen"
+        android:fontFamily="serif"
+        android:text=""
+        android:textColor="@color/White"
+        android:textSize="14sp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toStartOf="@+id/guideline1"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/totalMetersTotalTime"
+        android:layout_width="0dp"
+        android:layout_height="65dp"
+        android:background="#278577"
+        android:fontFamily="serif"
+        android:gravity="center"
+        android:text=""
+        android:textColor="#ffffff"
+        android:textSize="16sp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline1" />
+
+    <TextView
+        android:id="@+id/timeInTheTrip"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="#FF278577"
+        android:fontFamily="sans-serif"
+        android:gravity="center"
+        android:text="Trip time: "
+        android:textColor="#ffffff"
+        android:textSize="18dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.3" />
+
+</android.support.constraint.ConstraintLayout>

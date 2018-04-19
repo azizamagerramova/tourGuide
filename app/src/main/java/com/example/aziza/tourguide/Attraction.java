@@ -1,6 +1,7 @@
 package com.example.aziza.tourguide;
 
 import android.net.wifi.aware.AttachCallback;
+import android.util.Log;
 
 import org.osmdroid.util.GeoPoint;
 
@@ -64,7 +65,9 @@ public class Attraction {
     }
 
     public static Attraction getAttraction (ArrayList<Attraction> attractions, String name) {
+        Log.i("Find att in array", " Name to find is " + name);
         for (Attraction a: attractions) {
+            Log.i("find att in array", "Attraction name is " + a.name);
             if (a.name.equalsIgnoreCase(name))
                 return a;
         }

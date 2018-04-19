@@ -11,6 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/White"
-        android:headerBackground="@color/stringColorMain"
+        android:headerBackground="@color/darkBlue"
         android:numbersSelectorColor="@color/charcoal" />
 </LinearLayout>

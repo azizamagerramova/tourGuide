@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f9fafa"
+    tools:context="com.example.aziza.tourguide.MainActivity"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/loaded_tour_activity"
+    android:id="@+id/relativeLayout4">
+
+    <TextView
+        android:id="@+id/loadedTourName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tour Name"
+        android:textColor="@color/charcoal"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline1" />
+
+
+    <TextView
+        android:id="@+id/editTourText"
+        android:layout_width="wrap_content"
+        android:layout_height="34dp"
+        android:layout_marginBottom="10dp"
+        android:text="Do you want to make changes?"
+        android:textColor="@color/charcoal"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintBottom_toTopOf="@+id/editLoadedTour"
+        app:layout_constraintStart_toStartOf="@+id/editLoadedTour" />
+
+    <Button
+        android:id="@+id/editLoadedTour"
+        android:layout_width="335dp"
+        android:layout_height="49dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/BrightGreen"
+        android:text="Edit"
+        android:textColor="#fcfbfb"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <TextView
+        android:id="@+id/startTourText"
+        android:layout_width="wrap_content"
+        android:layout_height="34dp"
+        android:layout_marginBottom="10dp"
+        android:text="Do you want to start this tour?"
+        android:textColor="@color/charcoal"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintBottom_toTopOf="@+id/startLoadedTour"
+        app:layout_constraintStart_toStartOf="@+id/editLoadedTour" />
+
+    <Button
+        android:id="@+id/startLoadedTour"
+        android:layout_width="335dp"
+        android:layout_height="49dp"
+        android:layout_marginBottom="8dp"
+        android:background="#278577"
+        android:text="Begin"
+        android:textColor="#ffffff"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline4"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <TextView
+        android:id="@+id/deleteTourText"
+        android:layout_width="wrap_content"
+        android:layout_height="34dp"
+        android:layout_marginBottom="10dp"
+        android:text="Do you want to delete this tour?"
+        android:textColor="@color/charcoal"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintBottom_toTopOf="@+id/deleteTour"
+        app:layout_constraintStart_toStartOf="@+id/startTourText" />
+
+
+    <Button
+        android:id="@+id/deleteTour"
+        android:layout_width="335dp"
+        android:layout_height="49dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/DarkGreen"
+        android:text="Delete"
+        android:textColor="#fcfbfb"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline5"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <android.support.constraint.Guideline
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/guideline1"
+    android:orientation="horizontal"
+    app:layout_constraintGuide_percent="0.1"/>
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guideline2"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.12"/>
+
+    <android.support.constraint.Guideline
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/guideline3"
+    android:orientation="horizontal"
+    app:layout_constraintGuide_percent="0.38"/>
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guideline4"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.60"/>
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guideline5"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.85"/>
+
+</android.support.constraint.ConstraintLayout>

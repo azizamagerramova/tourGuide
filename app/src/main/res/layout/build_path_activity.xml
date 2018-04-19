@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.example.aziza.tourguide.startPoint">
 
-    <include layout="@layout/pick_point_content" />
+    <include layout="@layout/build_path_content" />
     <org.osmdroid.views.MapView android:id="@+id/map"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />

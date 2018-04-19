@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f9fafa"
+    tools:context="com.example.aziza.tourguide.MainActivity"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/attractions_on_map_activity"
+    android:id="@+id/relativeLayout5">
+
+
+    <TextView
+        android:id="@+id/pickAttAndTime"
+        android:layout_width="wrap_content"
+        android:layout_height="37dp"
+        android:text="Pick Attractions and Time Available"
+        android:textColor="#2f251c"
+        android:textSize="20sp"
+        android:typeface="normal"
+        app:layout_constraintBottom_toBottomOf="@id/guideline1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/timeToSpendSpot5"
+        android:layout_width="60dp"
+        android:layout_height="33dp"
+        android:ems="10"
+        android:inputType="time"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/timeToSpendSpot4"
+        app:layout_constraintTop_toBottomOf="@+id/spotToChoose4" />
+
+    <EditText
+        android:id="@+id/timeToSpendSpot4"
+        android:layout_width="60dp"
+        android:layout_height="33dp"
+        android:ems="10"
+        android:inputType="time"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/timeToSpendSpot3"
+        app:layout_constraintBaseline_toBaselineOf="@+id/spotToChoose4"
+        app:layout_constraintBottom_toBottomOf="@+id/spotToChoose4" />
+
+    <EditText
+        android:id="@+id/timeToSpendSpot3"
+        android:layout_width="60dp"
+        android:layout_height="33dp"
+        android:ems="10"
+        android:inputType="time"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/timeToSpendSpot2"
+        app:layout_constraintBaseline_toBaselineOf="@+id/spotToChoose3"
+        app:layout_constraintBottom_toBottomOf="@+id/spotToChoose3" />
+
+    <org.osmdroid.views.MapView
+        android:id="@+id/map"
+        android:layout_width="350dp"
+        android:layout_height="290dp"
+        app:layout_constraintBottom_toTopOf="@+id/proceedToBuildAPath"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spotToChoose5" />
+
+    <EditText
+        android:id="@+id/spotToChoose2"
+        android:layout_width="180dp"
+        android:layout_height="33dp"
+        android:ems="10"
+        android:hint="Attraction"
+        android:inputType="textPersonName"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/spotToChoose1"
+        app:layout_constraintTop_toBottomOf="@+id/spotToChoose1" />
+
+    <EditText
+        android:id="@+id/spotToChoose1"
+        android:layout_width="180dp"
+        android:layout_height="33dp"
+        android:ems="10"
+        android:hint="Attraction"
+        android:inputType="textPersonName"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/map"
+        app:layout_constraintTop_toBottomOf="@+id/pickAttAndTime" />
+
+    <EditText
+        android:id="@+id/spotToChoose5"
+        android:layout_width="180dp"
+        android:layout_height="33dp"
+        android:ems="10"
+        android:hint="Attraction"
+        android:inputType="textPersonName"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/spotToChoose4"
+        app:layout_constraintTop_toBottomOf="@+id/spotToChoose4" />
+
+    <EditText
+        android:id="@+id/spotToChoose4"
+        android:layout_width="180dp"
+        android:layout_height="33dp"
+        android:ems="10"
+        android:hint="Attraction"
+        android:inputType="textPersonName"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/spotToChoose3"
+        app:layout_constraintTop_toBottomOf="@+id/spotToChoose3" />
+
+    <EditText
+        android:id="@+id/spotToChoose3"
+        android:layout_width="180dp"
+        android:layout_height="33dp"
+        android:ems="10"
+        android:hint="Attraction"
+        android:inputType="textPersonName"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/spotToChoose2"
+        app:layout_constraintTop_toBottomOf="@+id/spotToChoose2" />
+
+    <EditText
+        android:id="@+id/timeToSpendSpot2"
+        android:layout_width="60dp"
+        android:layout_height="33dp"
+        android:ems="10"
+        android:inputType="time"
+        android:textSize="12sp"
+        app:layout_constraintTop_toBottomOf="@+id/timeToSpendSpot1"
+        app:layout_constraintEnd_toStartOf="@+id/textView2" />
+
+    <EditText
+        android:id="@+id/timeToSpendSpot1"
+        android:layout_width="60dp"
+        android:layout_height="33dp"
+        android:ems="10"
+        android:inputType="time"
+        android:textSize="12sp"
+        app:layout_constraintTop_toTopOf="@+id/spotToChoose1"
+        app:layout_constraintEnd_toStartOf="@+id/textView" />
+
+    <Button
+        android:id="@+id/proceedToBuildAPath"
+        android:layout_width="350dp"
+        android:layout_height="49dp"
+        android:background="@color/BrightGreen"
+        android:text="@android:string/ok"
+        android:textColor="#ffffff"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/map" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="minutes"
+        android:textColor="#2f251c"
+        android:textSize="14sp"
+        android:typeface="normal"
+        app:layout_constraintStart_toStartOf="@+id/textView4"
+        app:layout_constraintBaseline_toBaselineOf="@+id/timeToSpendSpot5"
+        app:layout_constraintBottom_toBottomOf="@+id/timeToSpendSpot5" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="minutes"
+        android:textColor="#2f251c"
+        android:textSize="14sp"
+        android:typeface="normal"
+        app:layout_constraintStart_toStartOf="@+id/textView3"
+        app:layout_constraintBaseline_toBaselineOf="@+id/timeToSpendSpot4"
+        app:layout_constraintBottom_toBottomOf="@+id/timeToSpendSpot4" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="minutes"
+        android:textColor="#2f251c"
+        android:textSize="14sp"
+        android:typeface="normal"
+        app:layout_constraintStart_toStartOf="@+id/textView2"
+        app:layout_constraintBaseline_toBaselineOf="@+id/timeToSpendSpot3"
+        app:layout_constraintBottom_toBottomOf="@+id/timeToSpendSpot3" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="minutes"
+        android:textColor="#2f251c"
+        android:textSize="14sp"
+        android:typeface="normal"
+        app:layout_constraintStart_toStartOf="@+id/textView"
+        app:layout_constraintBaseline_toBaselineOf="@+id/spotToChoose2"
+        app:layout_constraintBottom_toBottomOf="@+id/spotToChoose2" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="minutes"
+        android:textColor="#2f251c"
+        android:textSize="14sp"
+        android:typeface="normal"
+        app:layout_constraintBaseline_toBaselineOf="@+id/timeToSpendSpot1"
+        app:layout_constraintBottom_toBottomOf="@+id/timeToSpendSpot1"
+        app:layout_constraintEnd_toEndOf="@+id/pickAttAndTime" />
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guideline1"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.1"/>
+
+</android.support.constraint.ConstraintLayout>

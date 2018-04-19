@@ -37,6 +37,7 @@ public final class DBHelper extends SQLiteOpenHelper {
     public static String currentTourName ="-1";
     public static String currentTimeFrom = "";
     public static String currentTimeTo = "";
+    public static String currentVehicleOption = "";
 
     public static final String ATTRACTIONS_TABLE = "attractions";
     public static final String ATTRACTION_NAME = "att_name";
@@ -60,23 +61,18 @@ public final class DBHelper extends SQLiteOpenHelper {
         db.execSQL(
                 "create table attractions " +
                         "(id text primary key, att_name text, att_description text, city text, from_time_week text, from_time_wend text, " +
-                        "to_time_week text, to_time_wend text, latitude double, longitude double, time_to_spend double)"
+                        "to_time_week text, to_time_wend text, latitude double, longitude double, custom integer)"
         );
 
-//        /*create table with tours */
-//        db.execSQL(
-//                "create table tours " +
-//                        "(id text primary key, city_id text, tour_name text, att_id text)"
-//        );
 
         /*create table with tours */
         db.execSQL(
                 "create table tours " +
-                        "(tour_id text primary key, tour_name text, city_id text, from_time text, to_time text)"
+                        "(tour_id text primary key, tour_name text, city_id text, from_time text, to_time text, vehicle text)"
         );
         db.execSQL(
                 "create table toursToAtt " +
-                        "(id text primary key, tour_id text, att_id text)"
+                        "(id text primary key, tour_id text, att_id text, time_to_spend double, first_attraction integer)"
         );
 
 //         /* create table with attractions' hours of operation */
@@ -86,29 +82,78 @@ public final class DBHelper extends SQLiteOpenHelper {
 //        );
     }
 
-    public boolean addTour(String tourName, ArrayList<Attraction> attractions) {
+    public String getCurrentVehicleOption() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor res = db.rawQuery("select * from tours where tour_name = '" + currentTourName + "' " +
+                "and city_id = '" + getCurrentCityId() + "'", null);
+        if (res.getCount()>0) {
+            res.moveToNext();
+            return res.getString(res.getColumnIndex("vehicle"));
+        }
+        return  "";
+    }
+
+    public Attraction addAttToDB(Attraction att) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        Cursor res = db.rawQuery("select * from attractions where latitude = '" + att.latitude + "' " +
+                "and longitude= '" +att.longitude + "'", null);
+
+        if (res.getCount()<=0) {
+            Log.i("DBHelper: ", "attraction is not in db");
+            String uniqueID = UUID.randomUUID().toString();
+            contentValues.put("id", uniqueID);
+            contentValues.put(ATTRACTION_NAME, att.name);
+            contentValues.put("att_description","" );
+            contentValues.put(CITY_COLUMN_CITY, att.city);
+            contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
+            contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "00:00am");
+            contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "00:00am");
+            contentValues.put(CITY_COLUMN_TO_TIME_WEND, "00:00am");
+            contentValues.put("custom", 1);
+            contentValues.put(LATITUDE, att.latitude);
+            contentValues.put(LONGITUDE, att.longitude);
+            db.insert(ATTRACTIONS_TABLE, null, contentValues);
+            att.id = uniqueID;
+        }
+        return att;
+
+    }
+
+    public boolean addTour(String tourName, ArrayList<Attraction> attractions, Attraction firstAttraction) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("tour_name", tourName);
         contentValues.put("city_id", this.getCurrentCityId());
         contentValues.put("from_time", currentTimeFrom);
         contentValues.put("to_time", currentTimeTo);
+        contentValues.put("vehicle", currentVehicleOption);
         Cursor res = db.rawQuery("select * from tours where tour_name = '" + currentTourName + "' " +
                 "and city_id = '" + getCurrentCityId() + "'", null);
 
         if (res.getCount()<=0) {
+            Log.i("DBHelper: ", "creating new tour in the database");
             /* first create tour */
             String uniqueIDTour = UUID.randomUUID().toString();
+            Log.i("DBHelper: ", "created unique ID is " + uniqueIDTour);
             contentValues.put("tour_id", uniqueIDTour);
             db.insert("tours", null, contentValues);
 
             for (Attraction a : attractions) {
                 /*second create tour to attraction relation */
+                int valueFirst = 0;
+                if (a.longitude == firstAttraction.longitude && a.latitude == firstAttraction.latitude) {
+                    valueFirst = 1;
+                    Log.i("DB Helper", "this attraction goes first " + a.name);
+                }
+
                 contentValues = new ContentValues();
                 String uniqueIDTA = UUID.randomUUID().toString();
+                contentValues.put("first_attraction", valueFirst);
                 contentValues.put("id", uniqueIDTA);
                 contentValues.put("tour_id", uniqueIDTour);
                 contentValues.put("att_id", a.id);
+                contentValues.put("time_to_spend", a.time_to_spend);
                 db.insert("toursToAtt", null, contentValues);
             }
             return true;
@@ -118,19 +163,42 @@ public final class DBHelper extends SQLiteOpenHelper {
             replace info in tours to attraction table
          */
         else {
+            Log.i("DBHelper: ", "Updating old tour");
             db.update("tours", contentValues, "tour_name = '" + currentTourName + "'", null );
+            Log.i("DBHelper: ", "Tour name is " + currentTourName + "city id is " + this.getCurrentCityId());
+            Log.i("DBHelper: ", "Tour ID is " + getTourIdByNameNCityId(currentTourName, this.getCurrentCityId()));
             db.execSQL("delete from toursToAtt where tour_id = '" + getTourIdByNameNCityId(currentTourName, this.getCurrentCityId()) + "'");
             for (Attraction a : attractions) {
+                int valueFirst = 0;
+                if (a.longitude == firstAttraction.longitude && a.latitude == firstAttraction.latitude) {
+                    valueFirst = 1;
+                    Log.i("DB Helper", "this attraction goes first " + a.name);
+                }
+
                 contentValues = new ContentValues();
                 String uniqueIDTA = UUID.randomUUID().toString();
+                contentValues.put("first_attraction", valueFirst);
                 contentValues.put("id", uniqueIDTA);
                 contentValues.put("tour_id", getTourIdByNameNCityId(currentTourName, this.getCurrentCityId()));
                 contentValues.put("att_id", a.id);
+                contentValues.put("time_to_spend", a.time_to_spend);
                 db.insert("toursToAtt", null, contentValues);
 
             }
         }
         return true;
+    }
+
+
+    public void removeCurrentTour() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        Log.i("DBHelper: ", "current tour name " + currentTourName);
+        Log.i("DBHelper: ", "current city is " + getCurrent());
+        Log.i("DBHelper: ", "currentTourID " + getTourIdByNameNCityId(currentTourName, this.getCurrentCityId()));
+        db.execSQL("delete from toursToAtt where tour_id = '" + getTourIdByNameNCityId(currentTourName, this.getCurrentCityId()) + "'");
+        db.execSQL("delete from tours where tour_id = '" + getTourIdByNameNCityId(currentTourName, this.getCurrentCityId()) + "'");
+
     }
 
     @Override
@@ -140,12 +208,34 @@ public final class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public Attraction firstAttractionInTour() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("select * from toursToAtt where tour_id = '" + getTourIdByNameNCityId(currentTourName, getCurrentCityId()) + "' and " +
+                "first_attraction = '" + 1 + "'", null);
+
+        if(res!=null && res.getCount()>0) {
+            Log.i("DBHelper", "If we got here we are able to get tour id ");
+            res.moveToNext();
+            String thisId = res.getString(res.getColumnIndex("att_id"));
+            Cursor otherRes = db.rawQuery("select * from attractions where id = '" + thisId + "'", null);
+            otherRes.moveToFirst();
+            Attraction newAttraction = new Attraction(otherRes.getString(otherRes.getColumnIndex("id")),
+                    otherRes.getString(otherRes.getColumnIndex(ATTRACTION_NAME)),
+                    otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_CITY)), otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_FROM_TIME_WEEK)), otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_FROM_TIME_WEND)),
+                    otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_TO_TIME_WEEK)), otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_TO_TIME_WEND)),
+                    otherRes.getDouble(otherRes.getColumnIndex(LATITUDE)), otherRes.getDouble(otherRes.getColumnIndex(LONGITUDE)),
+                    res.getLong(res.getColumnIndex("time_to_spend")));
+            return  newAttraction;
+
+        }
+        return null;
+    }
+
     public ArrayList<Attraction> getAttractionsForCurrentTour () {
         SQLiteDatabase db = this.getReadableDatabase();
         ArrayList<Attraction> attractionsForCurrent = new ArrayList<Attraction>();
         Cursor res = db.rawQuery("select * from toursToAtt where tour_id = '" + getTourIdByNameNCityId(currentTourName, getCurrentCityId()) + "'", null);
         if(res!=null && res.getCount()>0) {
-            Log.i("Gotta know ", "res is " + res.getCount());
             for (int i=0;i<res.getCount();i++) {
                 res.moveToNext();
                 String thisId = res.getString(res.getColumnIndex("att_id"));
@@ -157,7 +247,7 @@ public final class DBHelper extends SQLiteOpenHelper {
                         otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_CITY)), otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_FROM_TIME_WEEK)), otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_FROM_TIME_WEND)),
                         otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_TO_TIME_WEEK)), otherRes.getString(otherRes.getColumnIndex(CITY_COLUMN_TO_TIME_WEND)),
                         otherRes.getDouble(otherRes.getColumnIndex(LATITUDE)), otherRes.getDouble(otherRes.getColumnIndex(LONGITUDE)),
-                        otherRes.getLong(otherRes.getColumnIndex("time_to_spend")));
+                        res.getLong(res.getColumnIndex("time_to_spend")));
                 attractionsForCurrent.add(newAttraction);
                 Log.i("DB Helper", "Retrieving attractions for current tour: "+newAttraction.name);
             }
@@ -172,22 +262,6 @@ public final class DBHelper extends SQLiteOpenHelper {
         currentTimeTo = to_time;
         Log.i("DB Helper: ", "from time is " + currentTimeFrom);
         Log.i("DB Helper: ", "to time is "+ currentTimeTo);
-//        ContentValues contentValues = new ContentValues();
-//        contentValues.put("city", cityName);
-//        contentValues.put("from_time", from_time);
-//        contentValues.put("to_time", to_time);
-//        Cursor res = db.rawQuery("select * from cities where city = '" + cityName + "'", null);
-//        Log.i("DB Helper", "number rows " + res.getCount());
-//
-//        /*shoud not ever get here, but just in case */
-//        if (res.getCount()<=0) {
-//            db.insert("cities", null, contentValues);
-//            return true;
-//        }
-//        Log.i("DB Helper", "Got into the else clause");
-//        int id = 0;
-//        db.update("cities", contentValues, "city = '" + cityName + "'", null );
-
         return true;
     }
 
@@ -208,6 +282,27 @@ public final class DBHelper extends SQLiteOpenHelper {
         return toursForCurrent;
     }
 
+    /*TODO: sort by city */
+    public ArrayList<String> getAllTourNames() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayList<String> toursForCurrent = new ArrayList<String>();
+        Cursor res = db.rawQuery("select * from tours ", null);
+        if(res!=null && res.getCount()>0) {
+            for (int i = 0; i < res.getCount(); i++) {
+                res.moveToNext();
+                if (!toursForCurrent.contains(res.getString(res.getColumnIndex("tour_name")))) {
+                    String cityId = res.getString(res.getColumnIndex("city_id"));
+                    Cursor cityRes = db.rawQuery("select * from cities where id = '" + cityId + "'", null);
+                    cityRes.moveToNext();
+                    String toAdd = res.getString(res.getColumnIndex("tour_name"));
+                    toAdd = toAdd + " (" + cityRes.getString(cityRes.getColumnIndex("city")) + ")";
+                    toursForCurrent.add(toAdd);
+                }
+            }
+        }
+        return toursForCurrent;
+    }
+
     public void setCurrentTourName(String tourName) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.rawQuery("select * from tours where tour_name = '" + tourName + "'", null);
@@ -223,7 +318,7 @@ public final class DBHelper extends SQLiteOpenHelper {
     public boolean toursExist() {
         SQLiteDatabase db = this.getReadableDatabase();
         String cityId = getCurrentCityId();
-        Cursor res = db.rawQuery("select * from tours where city_id = '" + cityId + "'", null);
+        Cursor res = db.rawQuery("select * from tours", null);
         if (res.getCount()>0) {
             return true;
         }
@@ -307,10 +402,10 @@ public final class DBHelper extends SQLiteOpenHelper {
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put("att_description","Grand, neo-Gothic complex hosting Canada's legislature, with artworks, lush grounds & tours." );
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "08:30am");
-        contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "08:30am");
         contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "06:00pm");
-        contentValues.put("time_to_spend", "60");
-        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "cl");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "06:00pm");
+        contentValues.put("custom", 0);
         contentValues.put(LATITUDE, 45.4236);
         contentValues.put(LONGITUDE, -75.7009);
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
@@ -321,11 +416,11 @@ public final class DBHelper extends SQLiteOpenHelper {
         contentValues.put(ATTRACTION_NAME, "Canadian Museum of History");
         contentValues.put("att_description","Museum chronicling Canadian culture & history, with an IMAX theater & separate children's museum." );
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
-        contentValues.put("time_to_spend", "150");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "09:30am");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "09:30am");
         contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "05:00pm");
         contentValues.put(CITY_COLUMN_TO_TIME_WEND, "05:00pm");
+        contentValues.put("custom", 0);
         contentValues.put(LATITUDE, 45.4302);
         contentValues.put(LONGITUDE, -75.7092);
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
@@ -336,12 +431,11 @@ public final class DBHelper extends SQLiteOpenHelper {
         contentValues.put(ATTRACTION_NAME, "National Gallery of Canada");
         contentValues.put("att_description","This spacious museum focusing on Canadian art also features some international art & a cafeteria." );
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
-        contentValues.put("time_to_spend", "150");
-        /*TODO: fix rigging put it back the way it should */
-        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "12:10pm");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "10:00am");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "10:00am");
         contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "05:00pm");
         contentValues.put(CITY_COLUMN_TO_TIME_WEND, "05:00pm");
+        contentValues.put("custom", 0);
         contentValues.put(LATITUDE, 45.4295);
         contentValues.put(LONGITUDE, -75.6989);
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
@@ -352,12 +446,16 @@ public final class DBHelper extends SQLiteOpenHelper {
         contentValues.put(ATTRACTION_NAME, "Rideau Hall");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put("att_description","This historic 1830s structure with landscaped grounds is the official home of the Governor General." );
-        contentValues.put("time_to_spend", "120");
-        /*TODO: fix rigging put it back the way it should */
-        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "10:00am");
+//        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "10:00am");
+//        contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "11:00am");
+//        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "04:30pm");
+//        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "04:00pm");
+
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "11:00am");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "11:00am");
-        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "04:00pm");
-        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "04:00pm");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "05:00pm");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "05:00pm");
+        contentValues.put("custom", 0);
         contentValues.put(LATITUDE, 45.4445);
         contentValues.put(LONGITUDE, -75.6858);
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
@@ -368,11 +466,11 @@ public final class DBHelper extends SQLiteOpenHelper {
         contentValues.put(ATTRACTION_NAME, "Jacques Cartier Park");
         contentValues.put("att_description","23-hectare park, site of the Winterlude festival (Feb), offering recreational paths & river views." );
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
-        contentValues.put("time_to_spend", "90");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "00:00am");
         contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "00:00am");
         contentValues.put(CITY_COLUMN_TO_TIME_WEND, "00:00am");
+        contentValues.put("custom", 0);
         contentValues.put(LATITUDE, 45.4340);
         contentValues.put(LONGITUDE, -75.7079);
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
@@ -383,11 +481,11 @@ public final class DBHelper extends SQLiteOpenHelper {
         contentValues.put(ATTRACTION_NAME, "Dow's Lake");
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
         contentValues.put("att_description","Dow's Lake in Ottawa, Ontario, Canada is a small man-made lake on the Rideau Canal, situated two kilometres north of Hog's Back Falls in the middle of Ottawa." );
-        contentValues.put("time_to_spend", "138");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "00:00am");
         contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "00:00am");
         contentValues.put(CITY_COLUMN_TO_TIME_WEND, "00:00am");
+        contentValues.put("custom", 0);
         contentValues.put(LATITUDE, 45.3948);
         contentValues.put(LONGITUDE, -75.7011);
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
@@ -398,11 +496,11 @@ public final class DBHelper extends SQLiteOpenHelper {
         contentValues.put(ATTRACTION_NAME, "Canada Science and Technology Museum");
         contentValues.put("att_description","Striking, modern museum with exhibits & programs devoted to Canadian science & technology." );
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
-        contentValues.put("time_to_spend", "180");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "09:00am");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "09:00am");
         contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "05:00pm");
         contentValues.put(CITY_COLUMN_TO_TIME_WEND, "05:00pm");
+        contentValues.put("custom", 0);
         contentValues.put(LATITUDE, 45.4023);
         contentValues.put(LONGITUDE, -75.6248);
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
@@ -414,11 +512,11 @@ public final class DBHelper extends SQLiteOpenHelper {
         contentValues.put("att_description","ByWard Market is a buzzing hub of outdoor farmers’ market stalls and specialty food shops selling Canadian cheese and maple-infused chocolate. " +
                 "It’s also known for its colorful street art and hip stores filled with crafts and clothes by local designers." );
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
-        contentValues.put("time_to_spend", "60");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "00:00am");
         contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "00:00am");
         contentValues.put(CITY_COLUMN_TO_TIME_WEND, "00:00am");
+        contentValues.put("custom", 0);
         contentValues.put(LATITUDE, 45.4289);
         contentValues.put(LONGITUDE, -75.6912);
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
@@ -429,13 +527,13 @@ public final class DBHelper extends SQLiteOpenHelper {
         contentValues.put(ATTRACTION_NAME, "Dominion Arboretum");
         contentValues.put("att_description","Visitors can explore many gardens at the country's oldest arboretum, home to 10,000 kinds of plants." );
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
-        contentValues.put("time_to_spend", "45");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "09:00am");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "08:00am");
         contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "04:00pm");
         contentValues.put(CITY_COLUMN_TO_TIME_WEND, "04:00pm");
-        contentValues.put(LATITUDE, 45.4289);
-        contentValues.put(LONGITUDE, -75.6912);
+        contentValues.put("custom", 0);
+        contentValues.put(LATITUDE, 45.3910);
+        contentValues.put(LONGITUDE, -75.7039);
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
 
         contentValues = new ContentValues();
@@ -444,14 +542,133 @@ public final class DBHelper extends SQLiteOpenHelper {
         contentValues.put(ATTRACTION_NAME, "Notre-Dame Cathedral Basilica");
         contentValues.put("att_description","Dating to the 19th century, this church features a colourful interior & skyline-dominating spires." );
         contentValues.put(CITY_COLUMN_CITY, "Ottawa");
-        contentValues.put("time_to_spend", "30");
-        /*TODO: fix rigging put it back the way it should */
         contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
         contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "00:00am");
-        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "00:00pm");
-        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "00:00pm");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "00:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "00:00am");
+        contentValues.put("custom", 0);
         contentValues.put(LATITUDE, 45.4299);
         contentValues.put(LONGITUDE, -75.6962);
+        db.insert(ATTRACTIONS_TABLE, null, contentValues);
+
+        contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
+        contentValues.put(ATTRACTION_NAME, "Mount Royal");
+        contentValues.put("att_description","Mount Royal is a large volcanic-related hill or small mountain in the city of Montreal, immediately west of Downtown Montreal, Quebec, Canada. Mount Royal gave its name to Montreal" );
+        contentValues.put(CITY_COLUMN_CITY, "Montreal");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "00:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "00:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "00:00am");
+        contentValues.put("custom", 0);
+        contentValues.put(LATITUDE, 45.5071);
+        contentValues.put(LONGITUDE, -73.5874);
+        db.insert(ATTRACTIONS_TABLE, null, contentValues);
+
+        contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
+        contentValues.put(ATTRACTION_NAME, "Montreal Botanical Garden");
+        contentValues.put("att_description","The Montreal Botanical Garden is a large botanical garden in Montreal, Quebec, Canada comprising 75 hectares of thematic gardens and greenhouses." );
+        contentValues.put(CITY_COLUMN_CITY, "Montreal");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "09:00am");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "09:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "05:00pm");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "05:00pm");
+        contentValues.put("custom", 0);
+        contentValues.put(LATITUDE, 45.5600);
+        contentValues.put(LONGITUDE, -73.5630);
+        db.insert(ATTRACTIONS_TABLE, null, contentValues);
+
+        contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
+        contentValues.put(ATTRACTION_NAME, "Saint Joseph's Oratory");
+        contentValues.put("att_description","Saint Joseph's Oratory of Mount Royal is a Roman Catholic minor basilica and national shrine on Mount Royal's Westmount Summit in Montreal, Quebec. It is Canada's largest church and claims to have one of the largest domes in the world." );
+        contentValues.put(CITY_COLUMN_CITY, "Montreal");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "06:00am");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "06:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "09:00pm");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "09:00pm");
+        contentValues.put("custom", 0);
+        contentValues.put(LATITUDE, 45.4926);
+        contentValues.put(LONGITUDE, -73.6183);
+        db.insert(ATTRACTIONS_TABLE, null, contentValues);
+
+        contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
+        contentValues.put(ATTRACTION_NAME, "Notre-Dame Basilica");
+        contentValues.put("att_description","Notre-Dame Basilica is a basilica in the historic district of Old Montreal, in Montreal, Quebec, Canada." );
+        contentValues.put(CITY_COLUMN_CITY, "Montreal");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "00:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "00:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "00:00am");
+        contentValues.put("custom", 0);
+        contentValues.put(LATITUDE, 45.5045);
+        contentValues.put(LONGITUDE, -73.5561);
+        db.insert(ATTRACTIONS_TABLE, null, contentValues);
+
+        contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
+        contentValues.put(ATTRACTION_NAME, "Old Montreal");
+        contentValues.put("att_description","Old Montreal is the oldest area in the city of Montreal, Quebec, Canada, with a few remains dating back to New France." );
+        contentValues.put(CITY_COLUMN_CITY, "Montreal");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "00:00am");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "00:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "00:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "00:00am");
+        contentValues.put("custom", 0);
+        contentValues.put(LATITUDE, 45.5075);
+        contentValues.put(LONGITUDE, -73.5544);
+        db.insert(ATTRACTIONS_TABLE, null, contentValues);
+
+        contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
+        contentValues.put(ATTRACTION_NAME, "Montreal Museum of Fine Arts");
+        contentValues.put("att_description","Spacious museum showcasing Québec & Canadian visual works, plus international contemporary art." );
+        contentValues.put(CITY_COLUMN_CITY, "Montreal");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "10:00am");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "10:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "05:00pm");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "05:00pm");
+        contentValues.put("custom", 0);
+        contentValues.put(LATITUDE, 45.4985);
+        contentValues.put(LONGITUDE, -73.5794);
+        db.insert(ATTRACTIONS_TABLE, null, contentValues);
+
+        contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
+        contentValues.put(ATTRACTION_NAME, "La Ronde");
+        contentValues.put("att_description","Riverside amusement park with Six Flags rides, the International Fireworks Competition & concerts." );
+        contentValues.put(CITY_COLUMN_CITY, "Montreal");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "10:00am");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "10:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "05:00pm");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "05:00pm");
+        contentValues.put("custom", 0);
+        contentValues.put(LATITUDE, 45.5227);
+        contentValues.put(LONGITUDE, -73.5345);
+        db.insert(ATTRACTIONS_TABLE, null, contentValues);
+
+        contentValues = new ContentValues();
+        uniqueID = UUID.randomUUID().toString();
+        contentValues.put("id", uniqueID);
+        contentValues.put(ATTRACTION_NAME, "Parc Jean-Drapeau");
+        contentValues.put("att_description","Park made up of 2 islands that are home to multiple attractions, venues & museums." );
+        contentValues.put(CITY_COLUMN_CITY, "Montreal");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEEK, "06:00am");
+        contentValues.put(CITY_COLUMN_FROM_TIME_WEND, "06:00am");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEEK, "10:00pm");
+        contentValues.put(CITY_COLUMN_TO_TIME_WEND, "10:00pm");
+        contentValues.put("custom", 0);
+        contentValues.put(LATITUDE, 45.5171);
+        contentValues.put(LONGITUDE, -73.5336);
         db.insert(ATTRACTIONS_TABLE, null, contentValues);
         return true;
     }
@@ -462,7 +679,8 @@ public final class DBHelper extends SQLiteOpenHelper {
          SQLiteDatabase db = this.getReadableDatabase();
          attractionsCity = new ArrayList<Attraction>();
          String cityName = getCurrent();
-         Cursor res = db.rawQuery("select * from attractions where city = '" + cityName + "'", null);
+         Cursor res = db.rawQuery("select * from attractions where city = '" + cityName + "'"  +
+                 "and custom = '" + 0 + "'", null);
          if(res!=null && res.getCount()>0) {
              for (int i=0;i<res.getCount();i++) {
                  res.moveToNext();
@@ -472,7 +690,7 @@ public final class DBHelper extends SQLiteOpenHelper {
                          res.getString(res.getColumnIndex(CITY_COLUMN_CITY)), res.getString(res.getColumnIndex(CITY_COLUMN_FROM_TIME_WEEK)), res.getString(res.getColumnIndex(CITY_COLUMN_FROM_TIME_WEND)),
                          res.getString(res.getColumnIndex(CITY_COLUMN_TO_TIME_WEEK)), res.getString(res.getColumnIndex(CITY_COLUMN_TO_TIME_WEND)),
                          res.getDouble(res.getColumnIndex(LATITUDE)), res.getDouble(res.getColumnIndex(LONGITUDE)),
-                         res.getLong(res.getColumnIndex("time_to_spend")));
+                         0);
                  newAttraction.description = res.getString(res.getColumnIndex("att_description"));
                  attractionsCity.add(newAttraction);
              }

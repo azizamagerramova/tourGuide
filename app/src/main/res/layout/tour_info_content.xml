@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f9fafa"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.example.aziza.tourguide.TourDetails"
+    tools:showIn="@layout/tour_info_activity">
+
+    <TextView
+        android:id="@+id/tourNameEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="What is the tour's name?"
+        android:textColor="#2f251c"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintBottom_toTopOf="@+id/tourNameEnter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/tourCityEdit"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <EditText
+        android:id="@+id/tourNameEnter"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:hint=""
+        android:inputType="textPersonName"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/tourCityEdit"
+        app:layout_constraintStart_toStartOf="@+id/tourCityEdit" />
+
+    <TextView
+        android:id="@+id/tourCityEdit"
+        android:layout_width="179dp"
+        android:layout_height="28dp"
+        android:layout_marginBottom="8dp"
+        android:text="Where are you going?"
+        android:textColor="#2f251c"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintBottom_toTopOf="@+id/pickCity"
+        app:layout_constraintStart_toStartOf="@+id/fromClock" />
+
+
+    <Spinner
+        android:id="@+id/pickCity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:entries="@array/cities_array"
+        android:popupBackground="#f9fafa"
+        android:prompt="@string/city_prompt"
+        android:textColor="@color/charcoal"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/fromTime"
+        app:layout_constraintStart_toStartOf="@+id/fromTime" />
+
+
+    <TextView
+        android:id="@+id/fromTime"
+        android:layout_width="wrap_content"
+        android:layout_height="26dp"
+        android:layout_marginBottom="8dp"
+        android:text="When do you start?"
+        android:textColor="#2f251c"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintBottom_toTopOf="@+id/fromClock"
+        app:layout_constraintStart_toStartOf="@+id/fromClock" />
+
+    <EditText
+        android:id="@+id/fromClock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:text="00:00 am"
+        android:textColor="@color/charcoal"
+        android:textColorLink="@color/backgroundColor"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/toTime"
+        app:layout_constraintStart_toStartOf="@+id/toClock" />
+
+    <TextView
+        android:id="@+id/toTime"
+        android:layout_width="wrap_content"
+        android:layout_height="27dp"
+        android:text="When do you finish?"
+        android:textColor="#2f251c"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintStart_toStartOf="@+id/loadTourAttractions"
+        app:layout_constraintTop_toTopOf="@+id/guideline" />
+
+
+    <EditText
+        android:id="@+id/toClock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="00:00 am"
+        android:textColor="@color/charcoal"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="@+id/loadTourAttractions"
+        app:layout_constraintTop_toBottomOf="@+id/toTime" />
+
+    <TextView
+        android:id="@+id/vehicle"
+        android:layout_width="wrap_content"
+        android:layout_height="31dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="12dp"
+        android:text="Do you want biking or walking tour?"
+        android:textColor="#2f251c"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintStart_toStartOf="@+id/loadTourAttractions"
+        app:layout_constraintTop_toBottomOf="@+id/toClock" />
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guideline"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5"/>
+
+    <Button
+        android:id="@+id/loadTourAttractions"
+        app:layout_constraintBottom_toBottomOf="@+id/guideline2"
+        app:layout_constraintTop_toBottomOf="parent"
+        android:layout_width="335dp"
+        android:layout_height="49dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:background="@color/BrightGreen"
+        android:text="ok"
+        android:textColor="#ffffff"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+         />
+
+    <RadioGroup
+        android:id="@+id/radioButtons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="@+id/vehicle"
+        app:layout_constraintTop_toBottomOf="@+id/vehicle">
+
+        <RadioButton
+            android:id="@+id/walkingTourOption"
+            android:layout_width="wrap_content"
+            android:layout_height="33dp"
+            android:layout_marginTop="8dp"
+            android:text="Walking"
+            app:layout_constraintTop_toBottomOf="@+id/vehicle"
+            tools:layout_editor_absoluteX="38dp" />
+
+        <RadioButton
+            android:id="@+id/bikingTourOption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="72dp"
+            android:layout_marginTop="8dp"
+            android:text="Biking"
+            app:layout_constraintStart_toEndOf="@+id/walkingTourOption"
+            app:layout_constraintTop_toBottomOf="@+id/vehicle" />
+    </RadioGroup>
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guideline2"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.8"/>
+
+</android.support.constraint.ConstraintLayout>

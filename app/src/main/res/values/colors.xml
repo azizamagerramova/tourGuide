@@ -7,10 +7,12 @@
     <color name="lightOrangy">#e3ada4</color>
     <color name="darkerOrangy">#c98e84</color>
     <color name="burgundyBack">#613942</color>
-    <color name="darkBlue">#272733</color>
+    <color name="darkBlue">#094754</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#FF4081</color>
     <color name="OttawaButton">#e6998d</color>
+    <color name="DarkGreen">#105952</color>
+    <color name="BrightGreen">#02b25f</color>
     <color name="Beige">#e8dbcb</color>
     <color name="White">#ffffff</color>
     <color name="charcoal">#36374b</color>

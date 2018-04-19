@@ -16,72 +16,37 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener  {
-    Button currentCityTourButton;
+    Button createNewTour,loadExistingTour;
     private Spinner spinner1;
     DBHelper mydb = new DBHelper(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        //this.getBackground().setAlpha(120);
-       //  mydb.dropDB();
-       //  mydb.generateContentDB();
-        currentCityTourButton = (Button)findViewById(R.id.CurrentCityTour);
-        spinner1 = (Spinner)findViewById(R.id.pickCity);
-        currentCityTourButton.setOnClickListener(new View.OnClickListener()  {
+        setContentView(R.layout.first_screen_activity);
+        //mydb.dropDB();
+        //mydb.generateContentDB();
+        //this.getBackground().(120);
+        createNewTour = (Button)findViewById(R.id.createNewTour);
+        loadExistingTour = (Button)findViewById(R.id.loadExistingTour);
+
+        createNewTour.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i("Got in the listener", "GUT");
-
-               // Intent cityTimePage = new Intent(MainActivity.this, PickTime.class);
-                Intent cityTimePage = new Intent(MainActivity.this, PickTime.class);
-                mydb.markCurrent(String.valueOf(spinner1.getSelectedItem()));
-                if (mydb.toursExist()) {
-                    ArrayList<String> s = mydb.getTourNamesForCurrentCity();
-                    String addNew = "New Tour";
-                    s.add(addNew);
-                    final ArrayAdapter<String> adp = new ArrayAdapter<String>(MainActivity.this,
-                            android.R.layout.simple_spinner_item, s);
-                    final Spinner sp = new Spinner(MainActivity.this);
-                    sp.setAdapter(adp);
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setPositiveButton("OK",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    /*mark current tour in database and load it on start
-                                    and open next page with time properly set
-                                     */
-                                    String choice = sp.getSelectedItem().toString();
-                                    if (choice.equalsIgnoreCase("New Tour"))
-                                        mydb.setCurrentTourName("-1");
-                                    else
-                                        mydb.setCurrentTourName(choice);
-                                    Intent cityTimePage = new Intent(MainActivity.this, PickTime.class);
-                                    startActivityForResult(cityTimePage, 0);
-                                }
-                            });
-                    builder.setNegativeButton("Cancel",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                    builder.setView(sp);
-                    builder.create().show();
-                }
-               else
-                   startActivityForResult(cityTimePage, 0);
+                mydb.currentTourName = "-1";
+                Intent newTourDetails = new Intent(MainActivity.this, TourDetails.class);
+                startActivityForResult(newTourDetails, 0);
             }
         });
-        addListenerOnSpinnerItemSelection();
 
-    }
+        loadExistingTour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent loadExistingTours = new Intent(MainActivity.this, dbTours.class);
+                startActivityForResult(loadExistingTours, 0);
+            }
+        });
 
-    public void addListenerOnSpinnerItemSelection() {
-        spinner1 = (Spinner) findViewById(R.id.pickCity);
-      //  spinner1.setOnItemSelectedListener(new CustomOnItemSelectedListener());
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
